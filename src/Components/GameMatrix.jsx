@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const VIMCursor = () => {
+const GameMatrix = () => {
   const rows = 10;
   const cols = 10;
 
@@ -11,10 +11,10 @@ const VIMCursor = () => {
   const [activeMatrixIndex, setActiveMatrixIndex] = useState([1, 1]);
   const [activeCursorIndex, setActiveCursorIndex] = useState([0, 0]);
 
-  let timeout: NodeJS.Timeout;
+  const timeoutRef = React.useRef();
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e) => {
       setActiveCursorIndex(([rowIndex, colIndex]) => {
         switch (e.key) {
           case "h":
@@ -30,6 +30,13 @@ const VIMCursor = () => {
         }
       });
     };
+    const changeActiveMatrixIndex = () => {
+      const newRowIndex = generateRandomNumber(0, rows - 1);
+      const newColIndex = generateRandomNumber(0, cols - 1);
+
+      setActiveMatrixIndex([newRowIndex, newColIndex]);
+      clearTimeout(timeoutRef.current);
+    };
 
     if (
       activeCursorIndex[0] === activeMatrixIndex[0] &&
@@ -42,10 +49,10 @@ const VIMCursor = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activeCursorIndex]);
+  }, [activeCursorIndex, activeMatrixIndex]);
 
   useEffect(() => {
-    timeout = setInterval(() => {
+    timeoutRef.current = setInterval(() => {
       const newRowIndex = generateRandomNumber(0, rows - 1);
       const newColIndex = generateRandomNumber(0, cols - 1);
 
@@ -53,24 +60,18 @@ const VIMCursor = () => {
     }, 5000);
   }, []);
 
-  const changeActiveMatrixIndex = () => {
-    const newRowIndex = generateRandomNumber(0, rows - 1);
-    const newColIndex = generateRandomNumber(0, cols - 1);
-
-    setActiveMatrixIndex([newRowIndex, newColIndex]);
-    clearTimeout(timeout);
-  };
-
-  const generateRandomNumber = (min: number, max: number) => {
+  const generateRandomNumber = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
 
   return (
-    <div className="p-4 w-full flex flex-col items-center">
-      <h1 className="text-2xl font-bold mb-4">VIM Cursor</h1>
-      <div className="grid grid-cols-100 gap-1">
+    <div className="p-4 w-full flex flex-col items-center justify-center flex-1">
+      <div className="grid grid-cols-100 gap-2">
         {matrix.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex">
+          <div
+            key={rowIndex}
+            className="flex items-center justify-center gap-2"
+          >
             {row.map((_, colIndex) => {
               const isActiveMatrixIndex =
                 rowIndex === activeMatrixIndex[0] &&
@@ -89,10 +90,10 @@ const VIMCursor = () => {
               return (
                 <span
                   key={colIndex}
-                  className={`w-4 h-4 flex items-center justify-center border border-blue-950 ${
-                    isActiveMatrixIndex ? "bg-red-500" : ""
-                  } ${isActiveCursorIndex ? "bg-blue-500" : ""}  ${
-                    isOverlapping ? "bg-green-500" : ""
+                  className={`text-primaryLight w-8 h-8 flex items-center justify-center border rounded-md border-blue ${
+                    isActiveMatrixIndex ? "bg-red" : ""
+                  } ${isActiveCursorIndex ? "bg-blue" : ""}  ${
+                    isOverlapping ? "bg-green" : ""
                   }
                     `}
                 >
@@ -107,4 +108,4 @@ const VIMCursor = () => {
   );
 };
 
-export default VIMCursor;
+export default GameMatrix;
